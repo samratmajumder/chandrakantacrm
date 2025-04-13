@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Estimate Details - Chandrakanta CRM{% endblock %}
+
+{% block styles %}
+<style>
+    .estimate-header {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .print-section {
+        background-color: white;
+        padding: 30px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+    }
+    .store-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    .store-name {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    .store-address, .store-contact {
+        font-size: 14px;
+        color: #666;
+    }
+    .estimate-title {
+        text-align: center;
+        margin: 20px 0;
+        font-size: 18px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .estimate-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+    .customer-info, .estimate-details {
+        flex: 1;
+    }
+    .info-label {
+        font-weight: 600;
+        margin-bottom: 3px;
+    }
+    .info-value {
+        margin-bottom: 10px;
+    }
+    .estimate-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    .estimate-table th {
+        background-color: #f8f9fa;
+        padding: 10px;
+        text-align: left;
+        font-weight: 600;
+        border: 1px solid #ddd;
+    }
+    .estimate-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        vertical-align: middle;
+    }
+    .item-picture {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+    .total-row {
+        font-weight: 600;
+    }
+    .print-footer {
+        margin-top: 40px;
+        display: flex;
+        justify-content: space-between;
+    }
+    .signature-section {
+        flex: 1;
+        text-align: center;
+    }
+    .signature-line {
+        border-top: 1px solid #000;
+        width: 70%;
+        margin: 40px auto 10px;
+    }
+    .terms-conditions {
+        margin-top: 30px;
+        font-size: 12px;
+        color: #666;
+    }
+    .action-buttons {
+        margin-top: 20px;
+        margin-bottom: 40px;
+    }
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: white;
+        }
+        .print-section {
+            box-shadow: none;
+            margin: 0;
+            padding: 15px;
+        }
+        .container-fluid {
+            padding: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="estimate-header no-print">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1 class="mb-2">Estimate Details</h1>
+            <p class="text-muted">View and print estimate</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="text-muted">
+                <i class="fas fa-calendar-alt me-2"></i>{{ now.strftime('%A, %B %d, %Y') }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="action-buttons no-print">
+    <button class="btn btn-primary" onclick="window.print()">
+        <i class="fas fa-print me-2"></i>Print Estimate
+    </button>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary ms-2">
+        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    </a>
+</div>
+
+<div class="print-section" id="printSection">
+    <!-- Store Header -->
+    <div class="store-header">
+        <div class="store-name">{{ config.STORE_NAME }}</div>
+        <div class="store-address">{{ config.STORE_ADDRESS }}</div>
+        <div class="store-contact">
+            <span>{{ config.STORE_PHONE }}</span> | <span>{{ config.STORE_EMAIL }}</span>
+        </div>
+    </div>
+    
+    <!-- Estimate Title -->
+    <div class="estimate-title">Estimate / Quotation</div>
+    
+    <!-- Estimate Info -->
+    <div class="estimate-info">
+        <div class="customer-info">
+            <div class="info-label">Customer:</div>
+            <div class="info-value" id="customerName"></div>
+            
+            <div class="info-label">Mobile:</div>
+            <div class="info-value" id="customerMobile"></div>
+            
+            <div class="info-label">Address:</div>
+            <div class="info-value" id="customerAddress"></div>
+        </div>
+        
+        <div class="estimate-details">
+            <div class="info-label">Quotation No:</div>
+            <div class="info-value" id="quotationNo"></div>
+            
+            <div class="info-label">Date:</div>
+            <div class="info-value" id="estimateDate"></div>
+            
+            <div class="info-label">Time:</div>
+            <div class="info-value" id="estimateTime"></div>
+        </div>
+    </div>
+    
+    <!-- Estimate Items Table -->
+    <table class="estimate-table">
+        <thead>
+            <tr>
+                <th width="5%">S.No</th>
+                <th width="20%">Item Code</th>
+                <th width="15%">Size</th>
+                <th width="10%">Picture</th>
+                <th width="10%">Area</th>
+                <th width="10%">Qty</th>
+                <th width="10%">Unit</th>
+                <th width="10%">Rate</th>
+                <th width="10%">Amount</th>
+            </tr>
+        </thead>
+        <tbody id="estimateTableBody">
+            <!-- Items will be added dynamically -->
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="8" class="text-end">Total Amount:</td>
+                <td id="totalAmount"></td>
+            </tr>
+        </tfoot>
+    </table>
+    
+    <!-- Print Footer -->
+    <div class="print-footer">
+        <div class="signature-section">
+            <div class="signature-line"></div>
+            <div>Customer Signature</div>
+        </div>
+        
+        <div class="signature-section">
+            <div class="signature-line"></div>
+            <div>For {{ config.STORE_NAME }}</div>
+        </div>
+    </div>
+    
+    <!-- Terms and Conditions -->
+    <div class="terms-conditions">
+        <p><strong>Terms & Conditions:</strong></p>
+        <ol>
+            <li>This is an estimate only and not a contract.</li>
+            <li>Prices are subject to change without notice.</li>
+            <li>Estimate valid for 30 days from the date of issue.</li>
+            <li>Delivery timeline will be confirmed upon order confirmation.</li>
+            <li>Payment terms: 50% advance, balance before delivery.</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const estimateId = {{ estimate_id }};
+        
+        // Load estimate data
+        fetch(`/api/estimates/${estimateId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load estimate');
+                }
+                return response.json();
+            })
+            .then(estimate => {
+                // Fill customer info
+                document.getElementById('customerName').textContent = estimate.customer_name;
+                document.getElementById('customerMobile').textContent = estimate.customer_mobile;
+                
+                // Get customer address
+                fetch(`/api/customers/${estimate.customer_id}`)
+                    .then(response => response.json())
+                    .then(customer => {
+                        document.getElementById('customerAddress').textContent = customer.address || 'N/A';
+                    })
+                    .catch(error => {
+                        console.error('Error loading customer:', error);
+                        document.getElementById('customerAddress').textContent = 'N/A';
+                    });
+                
+                // Fill estimate details
+                document.getElementById('quotationNo').textContent = estimate.quotation_no;
+                document.getElementById('estimateDate').textContent = estimate.estimate_date;
+                document.getElementById('estimateTime').textContent = estimate.estimate_time;
+                document.getElementById('totalAmount').textContent = `₹${estimate.total_amount.toFixed(2)}`;
+                
+                // Fill items table
+                const tableBody = document.getElementById('estimateTableBody');
+                tableBody.innerHTML = '';
+                
+                estimate.items.forEach(item => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${item.serial}</td>
+                        <td>${item.item_code}</td>
+                        <td>${item.size || ''}</td>
+                        <td class="text-center">
+                            ${item.picture ? `<img src="${item.picture}" class="item-picture">` : ''}
+                        </td>
+                        <td>${item.area ? item.area : ''}</td>
+                        <td>${item.quantity}</td>
+                        <td>${item.unit}</td>
+                        <td>₹${item.rate.toFixed(2)}</td>
+                        <td>₹${item.amount.toFixed(2)}</td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to load estimate: ' + error.message);
+            });
+    });
+</script>
+{% endblock %}

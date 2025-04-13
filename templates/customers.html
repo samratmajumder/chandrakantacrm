@@ -1,0 +1,383 @@
+{% extends "base.html" %}
+
+{% block title %}Customers - Chandrakanta CRM{% endblock %}
+
+{% block styles %}
+<style>
+    .customer-search {
+        margin-bottom: 20px;
+    }
+    .customer-card {
+        transition: transform 0.2s;
+        margin-bottom: 15px;
+    }
+    .customer-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .customer-info {
+        margin-bottom: 10px;
+    }
+    .customer-name {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    .customer-mobile {
+        color: #6c757d;
+    }
+    .customer-address {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    .no-customers {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+    }
+    .modal-header {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0"><i class="fas fa-users me-2"></i>Customers</h4>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
+                    <i class="fas fa-plus me-1"></i> Add Customer
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="customer-search">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" id="customerSearchInput" class="form-control" placeholder="Search customers by name or mobile number">
+                    </div>
+                </div>
+                
+                <div id="customersContainer">
+                    <div class="text-center p-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2">Loading customers...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Customer Modal -->
+<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Add New Customer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addCustomerForm">
+                    <div class="mb-3">
+                        <label for="customerName" class="form-label">Customer Name *</label>
+                        <input type="text" class="form-control" id="customerName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="customerMobile" class="form-label">Mobile Number *</label>
+                        <input type="text" class="form-control" id="customerMobile" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="customerAddress" class="form-label">Address</label>
+                        <textarea class="form-control" id="customerAddress" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveCustomerBtn">Save Customer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Customer Details Modal -->
+<div class="modal fade" id="customerDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-user me-2"></i>Customer Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="customerDetailsContent">
+                    <div class="text-center p-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2">Loading customer details...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="#" class="btn btn-primary" id="newEstimateForCustomerBtn">
+                    <i class="fas fa-file-invoice-dollar me-1"></i> Create Estimate
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const customersContainer = document.getElementById('customersContainer');
+        const customerSearchInput = document.getElementById('customerSearchInput');
+        const saveCustomerBtn = document.getElementById('saveCustomerBtn');
+        const customerDetailsContent = document.getElementById('customerDetailsContent');
+        const newEstimateForCustomerBtn = document.getElementById('newEstimateForCustomerBtn');
+        
+        // Load all customers on page load
+        loadCustomers();
+        
+        // Search customers as user types
+        customerSearchInput.addEventListener('input', function() {
+            const searchTerm = this.value.trim();
+            loadCustomers(searchTerm);
+        });
+        
+        // Save new customer
+        saveCustomerBtn.addEventListener('click', function() {
+            const name = document.getElementById('customerName').value.trim();
+            const mobile = document.getElementById('customerMobile').value.trim();
+            const address = document.getElementById('customerAddress').value.trim();
+            
+            if (!name || !mobile) {
+                alert('Name and mobile number are required');
+                return;
+            }
+            
+            const customerData = {
+                name: name,
+                mobile: mobile,
+                address: address
+            };
+            
+            fetch('/api/customers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(customerData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to create customer');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Close modal and reset form
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addCustomerModal'));
+                modal.hide();
+                document.getElementById('addCustomerForm').reset();
+                
+                // Reload customers
+                loadCustomers();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to create customer: ' + error.message);
+            });
+        });
+        
+        // Load customers from API
+        function loadCustomers(searchTerm = '') {
+            customersContainer.innerHTML = `
+                <div class="text-center p-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2">Loading customers...</p>
+                </div>
+            `;
+            
+            let url = '/api/customers';
+            if (searchTerm) {
+                url += `?search=${encodeURIComponent(searchTerm)}`;
+            }
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(customers => {
+                    if (customers.length === 0) {
+                        customersContainer.innerHTML = `
+                            <div class="no-customers">
+                                <i class="fas fa-users fa-3x mb-3"></i>
+                                <h5>No customers found</h5>
+                                <p class="text-muted">Add a new customer to get started</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    let html = '<div class="row">';
+                    
+                    customers.forEach(customer => {
+                        html += `
+                            <div class="col-md-4 col-lg-3">
+                                <div class="card customer-card">
+                                    <div class="card-body">
+                                        <div class="customer-info">
+                                            <div class="customer-name">${customer.name}</div>
+                                            <div class="customer-mobile">
+                                                <i class="fas fa-phone-alt me-1"></i>${customer.mobile}
+                                            </div>
+                                            <div class="customer-address">
+                                                <i class="fas fa-map-marker-alt me-1"></i>
+                                                ${customer.address || 'No address provided'}
+                                            </div>
+                                        </div>
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-sm btn-outline-primary view-customer-btn" 
+                                                    data-customer-id="${customer.id}">
+                                                <i class="fas fa-eye me-1"></i>View Details
+                                            </button>
+                                            <a href="/estimates/new?customer_id=${customer.id}" 
+                                               class="btn btn-sm btn-primary">
+                                                <i class="fas fa-file-invoice-dollar me-1"></i>New Estimate
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    customersContainer.innerHTML = html;
+                    
+                    // Add event listeners to view buttons
+                    document.querySelectorAll('.view-customer-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const customerId = this.getAttribute('data-customer-id');
+                            showCustomerDetails(customerId);
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    customersContainer.innerHTML = `
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Failed to load customers: ${error.message}
+                        </div>
+                    `;
+                });
+        }
+        
+        // Show customer details
+        function showCustomerDetails(customerId) {
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('customerDetailsModal'));
+            modal.show();
+            
+            // Set link for new estimate button
+            newEstimateForCustomerBtn.href = `/estimates/new?customer_id=${customerId}`;
+            
+            // Load customer details
+            customerDetailsContent.innerHTML = `
+                <div class="text-center p-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2">Loading customer details...</p>
+                </div>
+            `;
+            
+            fetch(`/api/customers/${customerId}`)
+                .then(response => response.json())
+                .then(customer => {
+                    let html = `
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h5>${customer.name}</h5>
+                                <p class="mb-1"><i class="fas fa-phone-alt me-2"></i>${customer.mobile}</p>
+                                <p class="mb-1"><i class="fas fa-map-marker-alt me-2"></i>${customer.address || 'No address provided'}</p>
+                                <p class="text-muted"><small>Customer since: ${new Date(customer.created_at).toLocaleDateString()}</small></p>
+                            </div>
+                        </div>
+                        
+                        <h6 class="mb-3">Recent Estimates</h6>
+                    `;
+                    
+                    // Load customer's estimates
+                    fetch(`/api/search?type=customer&term=${encodeURIComponent(customer.name)}`)
+                        .then(response => response.json())
+                        .then(estimates => {
+                            if (estimates.length === 0) {
+                                html += `
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        No estimates found for this customer.
+                                    </div>
+                                `;
+                            } else {
+                                html += `
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Quotation #</th>
+                                                    <th>Date</th>
+                                                    <th>Amount</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                `;
+                                
+                                estimates.forEach(estimate => {
+                                    html += `
+                                        <tr>
+                                            <td>${estimate.quotation_no}</td>
+                                            <td>${estimate.estimate_date}</td>
+                                            <td>₹${estimate.total_amount.toFixed(2)}</td>
+                                            <td>
+                                                <a href="/estimates/${estimate.estimate_id}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye me-1"></i>View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    `;
+                                });
+                                
+                                html += `
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                `;
+                            }
+                            
+                            customerDetailsContent.innerHTML = html;
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            customerDetailsContent.innerHTML = `
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Failed to load customer estimates: ${error.message}
+                                </div>
+                            `;
+                        });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    customerDetailsContent.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Failed to load customer details: ${error.message}
+                        </div>
+                    `;
+                });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Search Estimates - Chandrakanta CRM{% endblock %}
+
+{% block styles %}
+<style>
+    .search-container {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .search-results {
+        margin-top: 20px;
+    }
+    .result-card {
+        transition: transform 0.2s;
+        margin-bottom: 15px;
+    }
+    .result-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .no-results {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+    }
+    .search-tabs {
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title"><i class="fas fa-search me-2"></i>Search Estimates</h4>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs search-tabs" id="searchTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="customer-tab" data-bs-toggle="tab" data-bs-target="#customer-search" type="button" role="tab">
+                            <i class="fas fa-user me-1"></i> Search by Customer
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="date-tab" data-bs-toggle="tab" data-bs-target="#date-search" type="button" role="tab">
+                            <i class="fas fa-calendar-alt me-1"></i> Search by Date
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="searchTabsContent">
+                    <!-- Customer Search Tab -->
+                    <div class="tab-pane fade show active" id="customer-search" role="tabpanel">
+                        <div class="search-container">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <input type="text" id="customerSearchInput" class="form-control" placeholder="Enter customer name or mobile number">
+                                </div>
+                                <div class="col-md-4">
+                                    <button id="customerSearchBtn" class="btn btn-primary w-100">
+                                        <i class="fas fa-search me-2"></i>Search
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Date Search Tab -->
+                    <div class="tab-pane fade" id="date-search" role="tabpanel">
+                        <div class="search-container">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="startDate" class="form-label">Start Date</label>
+                                    <input type="date" id="startDate" class="form-control">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="endDate" class="form-label">End Date (Optional)</label>
+                                    <input type="date" id="endDate" class="form-control">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button id="dateSearchBtn" class="btn btn-primary w-100">
+                                        <i class="fas fa-search me-2"></i>Search
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Search Results -->
+                <div class="search-results">
+                    <div id="resultsContainer">
+                        <div class="no-results">
+                            <i class="fas fa-search fa-3x mb-3"></i>
+                            <h5>Search for estimates</h5>
+                            <p class="text-muted">Enter search criteria above to find estimates</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const customerSearchBtn = document.getElementById('customerSearchBtn');
+        const dateSearchBtn = document.getElementById('dateSearchBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        
+        // Customer search
+        customerSearchBtn.addEventListener('click', function() {
+            const searchTerm = document.getElementById('customerSearchInput').value.trim();
+            if (searchTerm) {
+                performSearch('customer', searchTerm);
+            } else {
+                showError('Please enter a search term');
+            }
+        });
+        
+        // Date search
+        dateSearchBtn.addEventListener('click', function() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (startDate) {
+                performSearch('date', null, startDate, endDate);
+            } else {
+                showError('Please select a start date');
+            }
+        });
+        
+        // Enter key for customer search
+        document.getElementById('customerSearchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                customerSearchBtn.click();
+            }
+        });
+        
+        // Perform search
+        function performSearch(type, term, startDate, endDate) {
+            resultsContainer.innerHTML = '<div class="text-center p-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Searching...</p></div>';
+            
+            let url = '/api/search?type=' + type;
+            
+            if (type === 'customer' && term) {
+                url += '&term=' + encodeURIComponent(term);
+            } else if (type === 'date') {
+                url += '&start_date=' + encodeURIComponent(startDate);
+                if (endDate) {
+                    url += '&end_date=' + encodeURIComponent(endDate);
+                }
+            }
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showError(data.error);
+                        return;
+                    }
+                    
+                    displayResults(data);
+                })
+                .catch(error => {
+                    showError('An error occurred while searching');
+                    console.error('Search error:', error);
+                });
+        }
+        
+        // Display search results
+        function displayResults(results) {
+            if (results.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
+                        <h5>No results found</h5>
+                        <p class="text-muted">Try different search criteria</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div class="table-responsive"><table class="table table-hover">';
+            html += `
+                <thead>
+                    <tr>
+                        <th>Quotation #</th>
+                        <th>Customer</th>
+                        <th>Mobile</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+            
+            results.forEach(result => {
+                html += `
+                    <tr>
+                        <td>${result.quotation_no}</td>
+                        <td>${result.customer_name}</td>
+                        <td>${result.customer_mobile}</td>
+                        <td>${result.estimate_date}</td>
+                        <td>₹${result.total_amount.toFixed(2)}</td>
+                        <td>
+                            <a href="/estimates/${result.estimate_id}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table></div>';
+            resultsContainer.innerHTML = html;
+        }
+        
+        // Show error message
+        function showError(message) {
+            resultsContainer.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>${message}
+                </div>
+            `;
+        }
+    });
+</script>
+{% endblock %}

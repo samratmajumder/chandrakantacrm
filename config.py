@@ -22,8 +22,8 @@ class Config:
     
     # Store information
     STORE_NAME = "Chandrakanta Store"
-    STORE_ADDRESS = "123 Main Street, City, State, ZIP"
-    STORE_PHONE = "+1 (123) 456-7890"
+    STORE_ADDRESS = "Hewitt Road, Lucknow, UP"
+    STORE_PHONE = "+91 00000 00000"
     STORE_EMAIL = "contact@chandrakantastore.com"
     
     # Allowed users

@@ -12,7 +12,7 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(120), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
     last_login = db.Column(db.DateTime, nullable=True)
     
     def set_password(self, password):
@@ -29,8 +29,8 @@ class Customer(db.Model):
     name = db.Column(db.String(120), nullable=False)
     address = db.Column(db.Text, nullable=True)
     mobile = db.Column(db.String(20), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
     
     # Relationship with estimates
     estimates = db.relationship('Estimate', backref='customer', lazy=True)
@@ -53,8 +53,8 @@ class Item(db.Model):
     code = db.Column(db.String(50), unique=True, nullable=False)
     picture = db.Column(db.String(255), nullable=True)
     rate = db.Column(db.Float, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
     
     def __repr__(self):
         return f'<Item {self.code}>'
@@ -73,11 +73,11 @@ class Estimate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     quotation_no = db.Column(db.String(50), unique=True, nullable=False)
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
-    estimate_date = db.Column(db.Date, default=datetime.utcnow().date)
-    estimate_time = db.Column(db.Time, default=datetime.utcnow().time)
+    estimate_date = db.Column(db.Date, default=datetime.now().date)
+    estimate_time = db.Column(db.Time, default=datetime.now().time)
     total_amount = db.Column(db.Float, default=0.0)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
     
     # Relationship with estimate items
     items = db.relationship('EstimateItem', backref='estimate', lazy=True, cascade="all, delete-orphan")

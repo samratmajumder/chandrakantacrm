@@ -47,7 +47,7 @@ def create_default_user():
         if User.query.count() == 0:
             admin_user = User(
                 username=app.config['USERNAME'],
-                name='Administrator'
+                name='Gaurish'
             )
             admin_user.set_password(app.config['PASSWORD'])
             db.session.add(admin_user)
@@ -76,7 +76,7 @@ def login():
                 return redirect(url_for('login'))
             
             # Update last login time
-            user.last_login = datetime.utcnow()
+            user.last_login = datetime.now()
             db.session.commit()
             
             # Begin user session
@@ -104,7 +104,7 @@ def logout():
 @allowed_users_only
 def dashboard():
     # Get statistics for dashboard
-    today = datetime.utcnow().date()
+    today = datetime.now().date()
     yesterday = today - timedelta(days=1)
     first_day_of_month = today.replace(day=1)
     first_day_of_year = today.replace(month=1, day=1)
@@ -266,7 +266,7 @@ def create_estimate():
     # Generate quotation number if not provided
     quotation_no = data.get('quotation_no')
     if not quotation_no:
-        today = datetime.utcnow().date()
+        today = datetime.now().date()
         count = Estimate.query.filter(Estimate.estimate_date == today).count() + 1
         quotation_no = f"EST-{count:03d}-{today.strftime('%d%m%Y')}"
     else:
@@ -279,8 +279,8 @@ def create_estimate():
     estimate = Estimate(
         quotation_no=quotation_no,
         customer_id=data.get('customer_id'),
-        estimate_date=datetime.utcnow().date(),
-        estimate_time=datetime.utcnow().time(),
+        estimate_date=datetime.now().date(),
+        estimate_time=datetime.now().time(),
         total_amount=data.get('total_amount', 0)
     )
     

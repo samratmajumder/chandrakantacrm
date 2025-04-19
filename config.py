@@ -1,8 +1,10 @@
 import os
 from datetime import timedelta
+from dotenv import load_dotenv
 
 class Config:
     # Flask configuration
+    load_dotenv()
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-key-for-chandrakanta-crm'
     
     # Database configuration

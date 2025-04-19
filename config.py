@@ -21,10 +21,10 @@ class Config:
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max upload
     
     # Store information
-    STORE_NAME = "Chandrakanta Store"
-    STORE_ADDRESS = "Hewitt Road, Lucknow, UP"
-    STORE_PHONE = "+91 00000 00000"
-    STORE_EMAIL = "contact@chandrakantastore.com"
+    STORE_NAME = "THE STUDIO"
+    STORE_ADDRESS = "Hewett Road, Lucknow, UP"
+    STORE_PHONE = "7985217829 / 6390337095"
+    STORE_EMAIL = "tctextra@gmail.com"
     
     # Allowed users
     ALLOWED_USERS = [USERNAME]  # Add more usernames if needed

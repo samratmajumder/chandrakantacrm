@@ -1,485 +1,603 @@
-{% extends "base.html" %}
-
-{% block title %}New Estimate - Chandrakanta CRM{% endblock %}
-
-{% block styles %}
+{% extends "base.html" %} {% block title %}New Estimate - Chandrakanta CRM{%
+endblock %} {% block styles %}
 <style>
-    .estimate-header {
-        background-color: #f8f9fa;
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 20px;
-    }
-    .customer-section {
-        margin-bottom: 20px;
-    }
-    .customer-search-results {
-        position: absolute;
-        width: 100%;
-        max-height: 200px;
-        overflow-y: auto;
-        z-index: 1000;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 0 0 4px 4px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        display: none;
-    }
-    .customer-search-item {
-        padding: 10px;
-        border-bottom: 1px solid #eee;
-        cursor: pointer;
-    }
-    .customer-search-item:hover {
-        background-color: #f5f5f5;
-    }
-    .customer-details {
-        padding: 15px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        background-color: #f9f9f9;
-        display: none;
-    }
-    .table-responsive {
-        overflow-x: auto;
-    }
-    .estimate-table th, .estimate-table td {
-        vertical-align: middle;
-    }
-    .item-row td {
-        padding: 8px 4px;
-    }
-    .item-code-cell {
-        position: relative;
-    }
-    .item-suggestions {
-        position: absolute;
-        width: 100%;
-        max-height: 150px;
-        overflow-y: auto;
-        z-index: 1000;
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        display: none;
-    }
-    .item-suggestion {
-        padding: 8px;
-        border-bottom: 1px solid #eee;
-        cursor: pointer;
-    }
-    .item-suggestion:hover {
-        background-color: #f5f5f5;
-    }
-    .item-picture {
-        width: 50px;
-        height: 50px;
-        object-fit: cover;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-    .picture-placeholder {
-        width: 50px;
-        height: 50px;
-        background-color: #e9ecef;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-    }
-    .add-row-btn {
-        margin-top: 10px;
-    }
-    .total-section {
-        margin-top: 20px;
-        padding: 15px;
-        background-color: #f8f9fa;
-        border-radius: 4px;
-    }
-    .action-buttons {
-        margin-top: 30px;
-    }
-    .modal-header {
-        background-color: #f8f9fa;
-    }
-    .image-preview {
-        max-width: 100%;
-        max-height: 300px;
-        margin-top: 10px;
-    }
+  .estimate-header {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .customer-section {
+    margin-bottom: 20px;
+  }
+  .customer-search-results {
+    position: absolute;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: none;
+  }
+  .customer-search-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+  }
+  .customer-search-item:hover {
+    background-color: #f5f5f5;
+  }
+  .customer-details {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    display: none;
+  }
+  .table-responsive {
+    overflow-x: auto;
+  }
+  .estimate-table th,
+  .estimate-table td {
+    vertical-align: middle;
+  }
+  .item-row td {
+    padding: 8px 4px;
+  }
+  .item-code-cell {
+    position: relative;
+  }
+  .item-suggestions {
+    position: absolute;
+    width: 100%;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 1000;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: none;
+  }
+  .item-suggestion {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+  }
+  .item-suggestion:hover {
+    background-color: #f5f5f5;
+  }
+  .item-picture {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .picture-placeholder {
+    width: 50px;
+    height: 50px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .add-row-btn {
+    margin-top: 10px;
+  }
+  .total-section {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+  }
+  .action-buttons {
+    margin-top: 30px;
+  }
+  .modal-header {
+    background-color: #f8f9fa;
+  }
+  .image-preview {
+    max-width: 100%;
+    max-height: 300px;
+    margin-top: 10px;
+  }
 </style>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="estimate-header">
-    <div class="row align-items-center">
-        <div class="col-md-8">
-            <h1 class="mb-2">New Estimate</h1>
-            <p class="text-muted">Create a new estimate for a customer</p>
-        </div>
-        <div class="col-md-4 text-end">
-            <div class="text-muted">
-                <i class="fas fa-calendar-alt me-2"></i>{{ now.strftime('%A, %B %d, %Y') }}
-            </div>
-        </div>
+  <div class="row align-items-center">
+    <div class="col-md-8">
+      <h1 class="mb-2">New Estimate</h1>
+      <p class="text-muted">Create a new estimate for a customer</p>
     </div>
+    <div class="col-md-4 text-end">
+      <div class="text-muted">
+        <i class="fas fa-calendar-alt me-2"></i>{{ now.strftime('%A, %B %d, %Y')
+        }}
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="card">
-    <div class="card-body">
-        <form id="estimateForm">
-            <!-- Customer Section -->
-            <div class="customer-section">
-                <h5 class="card-title mb-3">Customer Information</h5>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label for="customerMobile" class="form-label">Mobile Number</label>
-                        <div class="position-relative">
-                            <input type="text" class="form-control" id="customerMobile" placeholder="Enter customer mobile number">
-                            <div id="customerSearchResults" class="customer-search-results"></div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="quotationNo" class="form-label">Quotation Number</label>
-                        <input type="text" class="form-control" id="quotationNo" placeholder="Auto-generated if left blank">
-                    </div>
-                </div>
-                
-                <div id="customerDetails" class="customer-details mt-3">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <p class="mb-1"><strong>Name:</strong> <span id="customerName"></span></p>
-                        </div>
-                        <div class="col-md-4">
-                            <p class="mb-1"><strong>Mobile:</strong> <span id="customerMobileDisplay"></span></p>
-                        </div>
-                        <div class="col-md-4">
-                            <p class="mb-1"><strong>Address:</strong> <span id="customerAddress"></span></p>
-                        </div>
-                    </div>
-                </div>
+  <div class="card-body">
+    <form id="estimateForm">
+      <!-- Customer Section -->
+      <div class="customer-section">
+        <h5 class="card-title mb-3">Customer Information</h5>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="customerMobile" class="form-label">Mobile Number</label>
+            <div class="position-relative">
+              <input
+                type="text"
+                class="form-control"
+                id="customerMobile"
+                placeholder="Enter customer mobile number"
+              />
+              <div
+                id="customerSearchResults"
+                class="customer-search-results"
+              ></div>
             </div>
-            
-            <!-- Estimate Items Section -->
-            <h5 class="card-title mb-3 mt-4">Estimate Items</h5>
-            <div class="table-responsive">
-                <table class="table table-bordered estimate-table" id="estimateTable">
-                    <thead class="table-light">
-                        <tr>
-                            <th width="5%">S.No</th>
-                            <th width="20%">Item Code</th>
-                            <th width="15%">Size</th>
-                            <th width="10%">Picture</th>
-                            <th width="10%">Area</th>
-                            <th width="10%">Qty</th>
-                            <th width="10%">Unit</th>
-                            <th width="10%">Rate</th>
-                            <th width="10%">Amount</th>
-                            <th width="5%"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="estimateTableBody">
-                        <!-- Rows will be added dynamically -->
-                    </tbody>
-                </table>
+          </div>
+          <div class="col-md-6">
+            <label for="quotationNo" class="form-label">Quotation Number</label>
+            <input
+              type="text"
+              class="form-control"
+              id="quotationNo"
+              placeholder="Auto-generated if left blank"
+            />
+          </div>
+        </div>
+
+        <div id="customerDetails" class="customer-details mt-3">
+          <div class="row">
+            <div class="col-md-4">
+              <p class="mb-1">
+                <strong>Name:</strong> <span id="customerName"></span>
+              </p>
             </div>
-            
-            <div class="d-flex justify-content-end">
-                <button type="button" class="btn btn-outline-primary add-row-btn" id="addRowBtn">
-                    <i class="fas fa-plus-circle me-1"></i> Add Row
-                </button>
+            <div class="col-md-4">
+              <p class="mb-1">
+                <strong>Mobile:</strong>
+                <span id="customerMobileDisplay"></span>
+              </p>
             </div>
-            
-            <!-- Total Section -->
-            <div class="total-section">
-                <div class="row">
-                    <div class="col-md-8"></div>
-                    <div class="col-md-4">
-                        <div class="d-flex justify-content-between mb-2">
-                            <strong>Total Amount:</strong>
-                            <span id="totalAmount">₹0.00</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-md-4">
+              <p class="mb-1">
+                <strong>Address:</strong> <span id="customerAddress"></span>
+              </p>
             </div>
-            
-            <!-- Action Buttons -->
-            <div class="action-buttons d-flex justify-content-end">
-                <button type="button" class="btn btn-secondary me-2" id="cancelBtn">Cancel</button>
-                <button type="button" class="btn btn-success" id="saveEstimateBtn">
-                    <i class="fas fa-save me-1"></i> Save Estimate
-                </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estimate Items Section -->
+      <h5 class="card-title mb-3 mt-4">Estimate Items</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered estimate-table" id="estimateTable">
+          <thead class="table-light">
+            <tr>
+              <th width="5%">S.No</th>
+              <th width="25%">Item Code</th>
+              <th width="15%">Size</th>
+              <th width="10%">Picture</th>
+              <th width="10%">Area</th>
+              <th width="8%">Qty</th>
+              <th width="7%">Unit</th>
+              <th width="10%">Rate</th>
+              <th width="10%">Amount</th>
+              <th width="5%"></th>
+            </tr>
+          </thead>
+          <tbody id="estimateTableBody">
+            <!-- Rows will be added dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-end">
+        <button
+          type="button"
+          class="btn btn-outline-primary add-row-btn"
+          id="addRowBtn"
+        >
+          <i class="fas fa-plus-circle me-1"></i> Add Row
+        </button>
+      </div>
+
+      <!-- Total Section -->
+      <div class="total-section">
+        <div class="row">
+          <div class="col-md-8"></div>
+          <div class="col-md-4">
+            <div class="d-flex justify-content-between mb-2">
+              <strong>Total Amount:</strong>
+              <span id="totalAmount">₹0.00</span>
             </div>
-        </form>
-    </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons d-flex justify-content-end">
+        <button type="button" class="btn btn-secondary me-2" id="cancelBtn">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-success" id="saveEstimateBtn">
+          <i class="fas fa-save me-1"></i> Save Estimate
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- Image Upload Modal -->
 <div class="modal fade" id="imageUploadModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-image me-2"></i>Upload Item Image</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="imageUploadForm">
-                    <div class="mb-3">
-                        <label for="itemImage" class="form-label">Select or Capture Image</label>
-                        <input type="file" class="form-control" id="itemImage" accept="image/*" capture="environment">
-                    </div>
-                    <div id="imagePreviewContainer" class="text-center" style="display: none;">
-                        <img id="imagePreview" class="image-preview">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="uploadImageBtn">Upload</button>
-            </div>
-        </div>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-image me-2"></i>Upload Item Image
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form id="imageUploadForm">
+          <div class="mb-3">
+            <label for="itemImage" class="form-label"
+              >Select or Capture Image</label
+            >
+            <input
+              type="file"
+              class="form-control"
+              id="itemImage"
+              accept="image/*"
+              capture="environment"
+            />
+          </div>
+          <div
+            id="imagePreviewContainer"
+            class="text-center"
+            style="display: none"
+          >
+            <img id="imagePreview" class="image-preview" />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-danger"
+          id="removeImageBtn"
+          style="display: none"
+        >
+          <i class="fas fa-trash me-1"></i>Remove Image
+        </button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-primary" id="uploadImageBtn">
+          Upload
+        </button>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Duplicate Quotation Warning Modal -->
-<div class="modal fade" id="duplicateQuotationModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-warning">
-                <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Warning</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>The quotation number you entered already exists. Please use a different quotation number.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-            </div>
-        </div>
+<div
+  class="modal fade"
+  id="duplicateQuotationModal"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title">
+          <i class="fas fa-exclamation-triangle me-2"></i>Warning
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          The quotation number you entered already exists. Please use a
+          different quotation number.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+          OK
+        </button>
+      </div>
     </div>
+  </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Elements
-        const customerMobileInput = document.getElementById('customerMobile');
-        const customerSearchResults = document.getElementById('customerSearchResults');
-        const customerDetails = document.getElementById('customerDetails');
-        const customerName = document.getElementById('customerName');
-        const customerMobileDisplay = document.getElementById('customerMobileDisplay');
-        const customerAddress = document.getElementById('customerAddress');
-        const estimateTableBody = document.getElementById('estimateTableBody');
-        const addRowBtn = document.getElementById('addRowBtn');
-        const totalAmountDisplay = document.getElementById('totalAmount');
-        const saveEstimateBtn = document.getElementById('saveEstimateBtn');
-        const cancelBtn = document.getElementById('cancelBtn');
-        const quotationNoInput = document.getElementById('quotationNo');
-        
-        // Image upload elements
-        const imageUploadModal = new bootstrap.Modal(document.getElementById('imageUploadModal'));
-        const itemImageInput = document.getElementById('itemImage');
-        const imagePreview = document.getElementById('imagePreview');
-        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-        const uploadImageBtn = document.getElementById('uploadImageBtn');
-        
-        // Warning modal
-        const duplicateQuotationModal = new bootstrap.Modal(document.getElementById('duplicateQuotationModal'));
-        
-        // Variables
-        let selectedCustomerId = null;
-        let currentRowForImage = null;
-        let rowCounter = 1;
-        
-        // Initialize with 5 empty rows
-        for (let i = 0; i < 5; i++) {
-            addNewRow();
+  document.addEventListener("DOMContentLoaded", function () {
+    // Elements
+    const customerMobileInput = document.getElementById("customerMobile");
+    const customerSearchResults = document.getElementById(
+      "customerSearchResults"
+    );
+    const customerDetails = document.getElementById("customerDetails");
+    const customerName = document.getElementById("customerName");
+    const customerMobileDisplay = document.getElementById(
+      "customerMobileDisplay"
+    );
+    const customerAddress = document.getElementById("customerAddress");
+    const estimateTableBody = document.getElementById("estimateTableBody");
+    const addRowBtn = document.getElementById("addRowBtn");
+    const totalAmountDisplay = document.getElementById("totalAmount");
+    const saveEstimateBtn = document.getElementById("saveEstimateBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const quotationNoInput = document.getElementById("quotationNo");
+
+    // Image upload elements
+    const imageUploadModal = new bootstrap.Modal(
+      document.getElementById("imageUploadModal")
+    );
+    const itemImageInput = document.getElementById("itemImage");
+    const imagePreview = document.getElementById("imagePreview");
+    const imagePreviewContainer = document.getElementById(
+      "imagePreviewContainer"
+    );
+    const uploadImageBtn = document.getElementById("uploadImageBtn");
+
+    // Warning modal
+    const duplicateQuotationModal = new bootstrap.Modal(
+      document.getElementById("duplicateQuotationModal")
+    );
+
+    // Variables
+    let selectedCustomerId = null;
+    let currentRowForImage = null;
+    let rowCounter = 1;
+
+    // Initialize with 5 empty rows
+    for (let i = 0; i < 5; i++) {
+      addNewRow();
+    }
+
+    // Check for customer_id in URL query params
+    const urlParams = new URLSearchParams(window.location.search);
+    const customerIdParam = urlParams.get("customer_id");
+    if (customerIdParam) {
+      loadCustomerById(customerIdParam);
+    }
+
+    // Customer search
+    customerMobileInput.addEventListener("input", function () {
+      const searchTerm = this.value.trim();
+      if (searchTerm.length >= 3) {
+        searchCustomers(searchTerm);
+      } else {
+        customerSearchResults.style.display = "none";
+      }
+    });
+
+    // Hide search results when clicking outside
+    document.addEventListener("click", function (e) {
+      if (
+        !customerMobileInput.contains(e.target) &&
+        !customerSearchResults.contains(e.target)
+      ) {
+        customerSearchResults.style.display = "none";
+      }
+    });
+
+    // Add new row button
+    addRowBtn.addEventListener("click", function () {
+      addNewRow();
+    });
+
+    // Save estimate button
+    saveEstimateBtn.addEventListener("click", function () {
+      saveEstimate();
+    });
+
+    // Cancel button
+    cancelBtn.addEventListener("click", function () {
+      if (
+        confirm(
+          "Are you sure you want to cancel? All unsaved changes will be lost."
+        )
+      ) {
+        window.location.href = "/dashboard";
+      }
+    });
+
+    // Image preview and remove button handling
+    itemImageInput.addEventListener("change", function () {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          imagePreview.src = e.target.result;
+          imagePreviewContainer.style.display = "block";
+          document.getElementById("removeImageBtn").style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Remove image button
+    document
+      .getElementById("removeImageBtn")
+      .addEventListener("click", function () {
+        if (currentRowForImage) {
+          // Reset the image cell to placeholder
+          const imgCell =
+            currentRowForImage.querySelector(".item-picture-cell");
+          imgCell.innerHTML = `
+                    <div class="picture-placeholder" onclick="openImageUploadModal(this)">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                `;
+
+          // Remove the image path from the row
+          currentRowForImage.removeAttribute("data-picture");
+
+          // Close the modal
+          imageUploadModal.hide();
         }
-        
-        // Check for customer_id in URL query params
-        const urlParams = new URLSearchParams(window.location.search);
-        const customerIdParam = urlParams.get('customer_id');
-        if (customerIdParam) {
-            loadCustomerById(customerIdParam);
-        }
-        
-        // Customer search
-        customerMobileInput.addEventListener('input', function() {
-            const searchTerm = this.value.trim();
-            if (searchTerm.length >= 3) {
-                searchCustomers(searchTerm);
-            } else {
-                customerSearchResults.style.display = 'none';
-            }
+      });
+
+    // Upload image button
+    uploadImageBtn.addEventListener("click", function () {
+      const file = itemImageInput.files[0];
+      if (!file) {
+        alert("Please select an image to upload");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      fetch("/api/upload_image", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.error) {
+            throw new Error(data.error);
+          }
+
+          // Update the row with the image
+          if (currentRowForImage) {
+            const imgCell =
+              currentRowForImage.querySelector(".item-picture-cell");
+            imgCell.innerHTML = `<img src="${data.filename}" class="item-picture" onclick="openImageUploadModal(this)">`;
+
+            // Store the image path in a data attribute
+            currentRowForImage.setAttribute("data-picture", data.filename);
+          }
+
+          // Close the modal
+          imageUploadModal.hide();
+
+          // Reset the form
+          document.getElementById("imageUploadForm").reset();
+          imagePreviewContainer.style.display = "none";
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("Failed to upload image: " + error.message);
         });
-        
-        // Hide search results when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!customerMobileInput.contains(e.target) && !customerSearchResults.contains(e.target)) {
-                customerSearchResults.style.display = 'none';
-            }
-        });
-        
-        // Add new row button
-        addRowBtn.addEventListener('click', function() {
-            addNewRow();
-        });
-        
-        // Save estimate button
-        saveEstimateBtn.addEventListener('click', function() {
-            saveEstimate();
-        });
-        
-        // Cancel button
-        cancelBtn.addEventListener('click', function() {
-            if (confirm('Are you sure you want to cancel? All unsaved changes will be lost.')) {
-                window.location.href = '/dashboard';
-            }
-        });
-        
-        // Image preview
-        itemImageInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    imagePreview.src = e.target.result;
-                    imagePreviewContainer.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-        
-        // Upload image button
-        uploadImageBtn.addEventListener('click', function() {
-            const file = itemImageInput.files[0];
-            if (!file) {
-                alert('Please select an image to upload');
-                return;
-            }
-            
-            const formData = new FormData();
-            formData.append('image', file);
-            
-            fetch('/api/upload_image', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
-                // Update the row with the image
-                if (currentRowForImage) {
-                    const imgCell = currentRowForImage.querySelector('.item-picture-cell');
-                    imgCell.innerHTML = `<img src="${data.filename}" class="item-picture" onclick="openImageUploadModal(this)">`;
-                    
-                    // Store the image path in a data attribute
-                    currentRowForImage.setAttribute('data-picture', data.filename);
-                }
-                
-                // Close the modal
-                imageUploadModal.hide();
-                
-                // Reset the form
-                document.getElementById('imageUploadForm').reset();
-                imagePreviewContainer.style.display = 'none';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to upload image: ' + error.message);
-            });
-        });
-        
-        // Search customers
-        function searchCustomers(term) {
-            fetch(`/api/customers?search=${encodeURIComponent(term)}`)
-                .then(response => response.json())
-                .then(customers => {
-                    if (customers.length === 0) {
-                        customerSearchResults.innerHTML = `
+    });
+
+    // Search customers
+    function searchCustomers(term) {
+      fetch(`/api/customers?search=${encodeURIComponent(term)}`)
+        .then((response) => response.json())
+        .then((customers) => {
+          if (customers.length === 0) {
+            customerSearchResults.innerHTML = `
                             <div class="customer-search-item">
                                 No customers found. <a href="#" onclick="openAddCustomerModal()">Add new customer</a>
                             </div>
                         `;
-                    } else {
-                        let html = '';
-                        customers.forEach(customer => {
-                            html += `
-                                <div class="customer-search-item" data-id="${customer.id}" data-name="${customer.name}" 
-                                     data-mobile="${customer.mobile}" data-address="${customer.address || ''}">
+          } else {
+            let html = "";
+            customers.forEach((customer) => {
+              html += `
+                                <div class="customer-search-item" data-id="${
+                                  customer.id
+                                }" data-name="${customer.name}" 
+                                     data-mobile="${
+                                       customer.mobile
+                                     }" data-address="${
+                customer.address || ""
+              }">
                                     <div><strong>${customer.name}</strong></div>
                                     <div>${customer.mobile}</div>
                                 </div>
                             `;
-                        });
-                        customerSearchResults.innerHTML = html;
-                        
-                        // Add click event to search results
-                        document.querySelectorAll('.customer-search-item').forEach(item => {
-                            item.addEventListener('click', function() {
-                                selectCustomer(this);
-                            });
-                        });
-                    }
-                    
-                    customerSearchResults.style.display = 'block';
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    customerSearchResults.innerHTML = `
+            });
+            customerSearchResults.innerHTML = html;
+
+            // Add click event to search results
+            document
+              .querySelectorAll(".customer-search-item")
+              .forEach((item) => {
+                item.addEventListener("click", function () {
+                  selectCustomer(this);
+                });
+              });
+          }
+
+          customerSearchResults.style.display = "block";
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          customerSearchResults.innerHTML = `
                         <div class="customer-search-item text-danger">
                             Error searching customers: ${error.message}
                         </div>
                     `;
-                    customerSearchResults.style.display = 'block';
-                });
-        }
-        
-        // Load customer by ID
-        function loadCustomerById(customerId) {
-            fetch(`/api/customers/${customerId}`)
-                .then(response => response.json())
-                .then(customer => {
-                    selectedCustomerId = customer.id;
-                    customerMobileInput.value = customer.mobile;
-                    customerName.textContent = customer.name;
-                    customerMobileDisplay.textContent = customer.mobile;
-                    customerAddress.textContent = customer.address || 'N/A';
-                    customerDetails.style.display = 'block';
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to load customer: ' + error.message);
-                });
-        }
-        
-        // Select customer from search results
-        function selectCustomer(element) {
-            selectedCustomerId = element.getAttribute('data-id');
-            const name = element.getAttribute('data-name');
-            const mobile = element.getAttribute('data-mobile');
-            const address = element.getAttribute('data-address');
-            
-            customerMobileInput.value = mobile;
-            customerName.textContent = name;
-            customerMobileDisplay.textContent = mobile;
-            customerAddress.textContent = address || 'N/A';
-            
-            customerDetails.style.display = 'block';
-            customerSearchResults.style.display = 'none';
-        }
-        
-        // Add new row to estimate table
-        function addNewRow() {
-            const row = document.createElement('tr');
-            row.className = 'item-row';
-            row.innerHTML = `
+          customerSearchResults.style.display = "block";
+        });
+    }
+
+    // Load customer by ID
+    function loadCustomerById(customerId) {
+      fetch(`/api/customers/${customerId}`)
+        .then((response) => response.json())
+        .then((customer) => {
+          selectedCustomerId = customer.id;
+          customerMobileInput.value = customer.mobile;
+          customerName.textContent = customer.name;
+          customerMobileDisplay.textContent = customer.mobile;
+          customerAddress.textContent = customer.address || "N/A";
+          customerDetails.style.display = "block";
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("Failed to load customer: " + error.message);
+        });
+    }
+
+    // Select customer from search results
+    function selectCustomer(element) {
+      selectedCustomerId = element.getAttribute("data-id");
+      const name = element.getAttribute("data-name");
+      const mobile = element.getAttribute("data-mobile");
+      const address = element.getAttribute("data-address");
+
+      customerMobileInput.value = mobile;
+      customerName.textContent = name;
+      customerMobileDisplay.textContent = mobile;
+      customerAddress.textContent = address || "N/A";
+
+      customerDetails.style.display = "block";
+      customerSearchResults.style.display = "none";
+    }
+
+    // Add new row to estimate table
+    function addNewRow() {
+      const row = document.createElement("tr");
+      row.className = "item-row";
+      row.innerHTML = `
                 <td class="text-center">${rowCounter}</td>
                 <td class="item-code-cell">
                     <input type="text" class="form-control item-code-input" placeholder="Enter item code">
@@ -494,7 +612,10 @@
                     </div>
                 </td>
                 <td>
-                    <input type="number" class="form-control area-input" placeholder="Area" step="0.01">
+                    <div class="input-group">
+                        <input type="number" class="form-control area-input" placeholder="Area" step="0.01">
+                        <span class="input-group-text">Sq. Ft.</span>
+                    </div>
                 </td>
                 <td>
                     <input type="number" class="form-control quantity-input" placeholder="Qty" value="1" min="1" step="0.01">
@@ -517,268 +638,283 @@
                     </button>
                 </td>
             `;
-            
-            estimateTableBody.appendChild(row);
-            
-            // Add event listeners to the new row
-            const itemCodeInput = row.querySelector('.item-code-input');
-            const itemSuggestions = row.querySelector('.item-suggestions');
-            const quantityInput = row.querySelector('.quantity-input');
-            const rateInput = row.querySelector('.rate-input');
-            const amountInput = row.querySelector('.amount-input');
-            const deleteBtn = row.querySelector('.delete-row-btn');
-            
-            // Item code autocomplete
-            itemCodeInput.addEventListener('input', function() {
-                const searchTerm = this.value.trim();
-                if (searchTerm.length >= 2) {
-                    searchItems(searchTerm, itemSuggestions, row);
-                } else {
-                    itemSuggestions.style.display = 'none';
-                }
-            });
-            
-            // Hide suggestions when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!itemCodeInput.contains(e.target) && !itemSuggestions.contains(e.target)) {
-                    itemSuggestions.style.display = 'none';
-                }
-            });
-            
-            // Calculate amount when quantity or rate changes
-            quantityInput.addEventListener('input', function() {
-                calculateRowAmount(row);
-                updateTotalAmount();
-            });
-            
-            rateInput.addEventListener('input', function() {
-                calculateRowAmount(row);
-                updateTotalAmount();
-            });
-            
-            // Delete row
-            deleteBtn.addEventListener('click', function() {
-                if (estimateTableBody.children.length > 1) {
-                    row.remove();
-                    updateRowNumbers();
-                    updateTotalAmount();
-                } else {
-                    alert('Cannot delete the last row');
-                }
-            });
-            
-            rowCounter++;
+
+      estimateTableBody.appendChild(row);
+
+      // Add event listeners to the new row
+      const itemCodeInput = row.querySelector(".item-code-input");
+      const itemSuggestions = row.querySelector(".item-suggestions");
+      const quantityInput = row.querySelector(".quantity-input");
+      const rateInput = row.querySelector(".rate-input");
+      const amountInput = row.querySelector(".amount-input");
+      const deleteBtn = row.querySelector(".delete-row-btn");
+
+      // Item code autocomplete
+      itemCodeInput.addEventListener("input", function () {
+        const searchTerm = this.value.trim();
+        if (searchTerm.length >= 2) {
+          searchItems(searchTerm, itemSuggestions, row);
+        } else {
+          itemSuggestions.style.display = "none";
         }
-        
-        // Search items
-        function searchItems(term, suggestionsElement, row) {
-            fetch(`/api/items?search=${encodeURIComponent(term)}`)
-                .then(response => response.json())
-                .then(items => {
-                    if (items.length === 0) {
-                        suggestionsElement.innerHTML = `
+      });
+
+      // Hide suggestions when clicking outside
+      document.addEventListener("click", function (e) {
+        if (
+          !itemCodeInput.contains(e.target) &&
+          !itemSuggestions.contains(e.target)
+        ) {
+          itemSuggestions.style.display = "none";
+        }
+      });
+
+      // Calculate amount when quantity or rate changes
+      quantityInput.addEventListener("input", function () {
+        calculateRowAmount(row);
+        updateTotalAmount();
+      });
+
+      rateInput.addEventListener("input", function () {
+        calculateRowAmount(row);
+        updateTotalAmount();
+      });
+
+      // Delete row
+      deleteBtn.addEventListener("click", function () {
+        if (estimateTableBody.children.length > 1) {
+          row.remove();
+          updateRowNumbers();
+          updateTotalAmount();
+        } else {
+          alert("Cannot delete the last row");
+        }
+      });
+
+      rowCounter++;
+    }
+
+    // Search items
+    function searchItems(term, suggestionsElement, row) {
+      fetch(`/api/items?search=${encodeURIComponent(term)}`)
+        .then((response) => response.json())
+        .then((items) => {
+          if (items.length === 0) {
+            suggestionsElement.innerHTML = `
                             <div class="item-suggestion">
                                 No items found. Enter details for new item.
                             </div>
                         `;
-                    } else {
-                        let html = '';
-                        items.forEach(item => {
-                            html += `
-                                <div class="item-suggestion" data-code="${item.code}" data-rate="${item.rate}" data-picture="${item.picture || ''}">
+          } else {
+            let html = "";
+            items.forEach((item) => {
+              html += `
+                                <div class="item-suggestion" data-code="${
+                                  item.code
+                                }" data-rate="${item.rate}" data-picture="${
+                item.picture || ""
+              }">
                                     <div><strong>${item.code}</strong></div>
                                     <div>Rate: ₹${item.rate.toFixed(2)}</div>
                                 </div>
                             `;
-                        });
-                        suggestionsElement.innerHTML = html;
-                        
-                        // Add click event to suggestions
-                        suggestionsElement.querySelectorAll('.item-suggestion').forEach(suggestion => {
-                            suggestion.addEventListener('click', function() {
-                                selectItem(this, row);
-                            });
-                        });
-                    }
-                    
-                    suggestionsElement.style.display = 'block';
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    suggestionsElement.innerHTML = `
+            });
+            suggestionsElement.innerHTML = html;
+
+            // Add click event to suggestions
+            suggestionsElement
+              .querySelectorAll(".item-suggestion")
+              .forEach((suggestion) => {
+                suggestion.addEventListener("click", function () {
+                  selectItem(this, row);
+                });
+              });
+          }
+
+          suggestionsElement.style.display = "block";
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          suggestionsElement.innerHTML = `
                         <div class="item-suggestion text-danger">
                             Error searching items: ${error.message}
                         </div>
                     `;
-                    suggestionsElement.style.display = 'block';
-                });
+          suggestionsElement.style.display = "block";
+        });
+    }
+
+    // Select item from suggestions
+    function selectItem(element, row) {
+      const code = element.getAttribute("data-code");
+      const rate = element.getAttribute("data-rate");
+      const picture = element.getAttribute("data-picture");
+
+      row.querySelector(".item-code-input").value = code;
+      row.querySelector(".rate-input").value = rate;
+
+      // Update picture if available
+      if (picture) {
+        const imgCell = row.querySelector(".item-picture-cell");
+        imgCell.innerHTML = `<img src="${picture}" class="item-picture" onclick="openImageUploadModal(this)">`;
+        row.setAttribute("data-picture", picture);
+      }
+
+      // Hide suggestions
+      row.querySelector(".item-suggestions").style.display = "none";
+
+      // Calculate amount
+      calculateRowAmount(row);
+      updateTotalAmount();
+    }
+
+    // Calculate row amount
+    function calculateRowAmount(row) {
+      const quantity =
+        parseFloat(row.querySelector(".quantity-input").value) || 0;
+      const rate = parseFloat(row.querySelector(".rate-input").value) || 0;
+      const amount = quantity * rate;
+
+      row.querySelector(".amount-input").value = amount.toFixed(2);
+    }
+
+    // Update row numbers
+    function updateRowNumbers() {
+      const rows = estimateTableBody.querySelectorAll(".item-row");
+      rows.forEach((row, index) => {
+        row.cells[0].textContent = index + 1;
+      });
+
+      // Update row counter
+      rowCounter = rows.length + 1;
+    }
+
+    // Update total amount
+    function updateTotalAmount() {
+      const rows = estimateTableBody.querySelectorAll(".item-row");
+      let total = 0;
+
+      rows.forEach((row) => {
+        const amount =
+          parseFloat(row.querySelector(".amount-input").value) || 0;
+        total += amount;
+      });
+
+      totalAmountDisplay.textContent = `₹${total.toFixed(2)}`;
+    }
+
+    // Save estimate
+    function saveEstimate() {
+      // Validate customer
+      if (!selectedCustomerId) {
+        alert("Please select a customer");
+        return;
+      }
+
+      // Get quotation number
+      const quotationNo = quotationNoInput.value.trim();
+
+      // Get items
+      const items = [];
+      const rows = estimateTableBody.querySelectorAll(".item-row");
+      let hasItems = false;
+
+      rows.forEach((row, index) => {
+        const itemCode = row.querySelector(".item-code-input").value.trim();
+        const size = row
+          .querySelector('input[placeholder="Size"]')
+          .value.trim();
+        const area = parseFloat(row.querySelector(".area-input").value) || null;
+        const quantity =
+          parseFloat(row.querySelector(".quantity-input").value) || 0;
+        const unit = row.querySelector(".unit-select").value;
+        const rate = parseFloat(row.querySelector(".rate-input").value) || 0;
+        const amount =
+          parseFloat(row.querySelector(".amount-input").value) || 0;
+        const picture = row.getAttribute("data-picture") || "";
+
+        if (itemCode && quantity > 0 && rate > 0) {
+          hasItems = true;
+          items.push({
+            serial: index + 1,
+            item_code: itemCode,
+            size: size,
+            area: area,
+            quantity: quantity,
+            unit: unit,
+            rate: rate,
+            amount: amount,
+            picture: picture,
+          });
         }
-        
-        // Select item from suggestions
-        function selectItem(element, row) {
-            const code = element.getAttribute('data-code');
-            const rate = element.getAttribute('data-rate');
-            const picture = element.getAttribute('data-picture');
-            
-            row.querySelector('.item-code-input').value = code;
-            row.querySelector('.rate-input').value = rate;
-            
-            // Update picture if available
-            if (picture) {
-                const imgCell = row.querySelector('.item-picture-cell');
-                imgCell.innerHTML = `<img src="${picture}" class="item-picture" onclick="openImageUploadModal(this)">`;
-                row.setAttribute('data-picture', picture);
-            }
-            
-            // Hide suggestions
-            row.querySelector('.item-suggestions').style.display = 'none';
-            
-            // Calculate amount
-            calculateRowAmount(row);
-            updateTotalAmount();
-        }
-        
-        // Calculate row amount
-        function calculateRowAmount(row) {
-            const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
-            const rate = parseFloat(row.querySelector('.rate-input').value) || 0;
-            const amount = quantity * rate;
-            
-            row.querySelector('.amount-input').value = amount.toFixed(2);
-        }
-        
-        // Update row numbers
-        function updateRowNumbers() {
-            const rows = estimateTableBody.querySelectorAll('.item-row');
-            rows.forEach((row, index) => {
-                row.cells[0].textContent = index + 1;
+      });
+
+      if (!hasItems) {
+        alert("Please add at least one item with code, quantity, and rate");
+        return;
+      }
+
+      // Calculate total amount
+      const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
+
+      // Create estimate data
+      const estimateData = {
+        customer_id: selectedCustomerId,
+        quotation_no: quotationNo,
+        total_amount: totalAmount,
+        items: items,
+      };
+
+      // Save estimate
+      fetch("/api/estimates", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(estimateData),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            return response.json().then((data) => {
+              throw new Error(data.error || "Failed to create estimate");
             });
-            
-            // Update row counter
-            rowCounter = rows.length + 1;
-        }
-        
-        // Update total amount
-        function updateTotalAmount() {
-            const rows = estimateTableBody.querySelectorAll('.item-row');
-            let total = 0;
-            
-            rows.forEach(row => {
-                const amount = parseFloat(row.querySelector('.amount-input').value) || 0;
-                total += amount;
-            });
-            
-            totalAmountDisplay.textContent = `₹${total.toFixed(2)}`;
-        }
-        
-        // Save estimate
-        function saveEstimate() {
-            // Validate customer
-            if (!selectedCustomerId) {
-                alert('Please select a customer');
-                return;
-            }
-            
-            // Get quotation number
-            const quotationNo = quotationNoInput.value.trim();
-            
-            // Get items
-            const items = [];
-            const rows = estimateTableBody.querySelectorAll('.item-row');
-            let hasItems = false;
-            
-            rows.forEach((row, index) => {
-                const itemCode = row.querySelector('.item-code-input').value.trim();
-                const size = row.querySelector('input[placeholder="Size"]').value.trim();
-                const area = parseFloat(row.querySelector('.area-input').value) || null;
-                const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
-                const unit = row.querySelector('.unit-select').value;
-                const rate = parseFloat(row.querySelector('.rate-input').value) || 0;
-                const amount = parseFloat(row.querySelector('.amount-input').value) || 0;
-                const picture = row.getAttribute('data-picture') || '';
-                
-                if (itemCode && quantity > 0 && rate > 0) {
-                    hasItems = true;
-                    items.push({
-                        serial: index + 1,
-                        item_code: itemCode,
-                        size: size,
-                        area: area,
-                        quantity: quantity,
-                        unit: unit,
-                        rate: rate,
-                        amount: amount,
-                        picture: picture
-                    });
-                }
-            });
-            
-            if (!hasItems) {
-                alert('Please add at least one item with code, quantity, and rate');
-                return;
-            }
-            
-            // Calculate total amount
-            const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
-            
-            // Create estimate data
-            const estimateData = {
-                customer_id: selectedCustomerId,
-                quotation_no: quotationNo,
-                total_amount: totalAmount,
-                items: items
-            };
-            
-            // Save estimate
-            fetch('/api/estimates', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(estimateData)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.error || 'Failed to create estimate');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Redirect to estimate view
-                window.location.href = `/estimates/${data.id}`;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                
-                // Check for duplicate quotation number
-                if (error.message.includes('Quotation number already exists')) {
-                    duplicateQuotationModal.show();
-                } else {
-                    alert('Failed to create estimate: ' + error.message);
-                }
-            });
-        }
-        
-        // Make functions available globally
-        window.openImageUploadModal = function(element) {
-            // Find the parent row
-            currentRowForImage = element.closest('tr');
-            
-            // Reset the form
-            document.getElementById('imageUploadForm').reset();
-            imagePreviewContainer.style.display = 'none';
-            
-            // Show the modal
-            imageUploadModal.show();
-        };
-        
-        window.openAddCustomerModal = function() {
-            // This would be implemented if we had an add customer modal on this page
-            // For now, redirect to customers page
-            window.location.href = '/customers';
-        };
-    });
+          }
+          return response.json();
+        })
+        .then((data) => {
+          // Redirect to estimate view
+          window.location.href = `/estimates/${data.id}`;
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+
+          // Check for duplicate quotation number
+          if (error.message.includes("Quotation number already exists")) {
+            duplicateQuotationModal.show();
+          } else {
+            alert("Failed to create estimate: " + error.message);
+          }
+        });
+    }
+
+    // Make functions available globally
+    window.openImageUploadModal = function (element) {
+      // Find the parent row
+      currentRowForImage = element.closest("tr");
+
+      // Reset the form
+      document.getElementById("imageUploadForm").reset();
+      imagePreviewContainer.style.display = "none";
+
+      // Show the modal
+      imageUploadModal.show();
+    };
+
+    window.openAddCustomerModal = function () {
+      // This would be implemented if we had an add customer modal on this page
+      // For now, redirect to customers page
+      window.location.href = "/customers";
+    };
+  });
 </script>
 {% endblock %}

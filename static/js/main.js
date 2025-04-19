@@ -37,13 +37,16 @@ function formatCurrency(amount) {
 }
 
 /**
- * Format a date string to a more readable format
+ * Format a date string to DD/MM/YYYY format
  * @param {string} dateString - ISO date string
  * @returns {string} Formatted date string
  */
 function formatDate(dateString) {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-IN', options);
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
 }
 
 /**

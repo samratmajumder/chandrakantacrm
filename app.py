@@ -268,7 +268,7 @@ def create_estimate():
     if not quotation_no:
         today = datetime.utcnow().date()
         count = Estimate.query.filter(Estimate.estimate_date == today).count() + 1
-        quotation_no = f"EST-{count:03d}{today.strftime('%d%m%Y')}"
+        quotation_no = f"EST-{count:03d}-{today.strftime('%d%m%Y')}"
     else:
         # Check if quotation number already exists
         existing = Estimate.query.filter_by(quotation_no=quotation_no).first()

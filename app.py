@@ -242,6 +242,13 @@ def api_search():
 def new_estimate():
     return render_template('estimate_form.html')
 
+@app.route('/estimates/edit/<int:estimate_id>')
+@allowed_users_only
+def edit_estimate(estimate_id):
+    # Check if estimate exists
+    estimate = Estimate.query.get_or_404(estimate_id)
+    return render_template('estimate_form.html', estimate_id=estimate_id, is_edit=True)
+
 @app.route('/estimates/<int:estimate_id>')
 @allowed_users_only
 def view_estimate(estimate_id):
@@ -325,6 +332,71 @@ def create_estimate():
     db.session.commit()
     
     return jsonify(estimate.to_dict()), 201
+
+@app.route('/api/estimates/<int:estimate_id>', methods=['PUT'])
+@allowed_users_only
+def update_estimate(estimate_id):
+    estimate = Estimate.query.get_or_404(estimate_id)
+    data = request.json
+    
+    # Validate required fields
+    if not data.get('customer_id') or not data.get('items') or len(data.get('items', [])) == 0:
+        return jsonify({'error': 'Customer and at least one item are required'}), 400
+    
+    # Check if quotation number changed and if the new one already exists
+    if data.get('quotation_no') and data.get('quotation_no') != estimate.quotation_no:
+        existing = Estimate.query.filter_by(quotation_no=data.get('quotation_no')).first()
+        if existing and existing.id != estimate_id:
+            return jsonify({'error': 'Quotation number already exists'}), 400
+    
+    # Update estimate
+    if data.get('quotation_no'):
+        estimate.quotation_no = data.get('quotation_no')
+    
+    estimate.customer_id = data.get('customer_id')
+    estimate.total_amount = data.get('total_amount', 0)
+    
+    # Remove old estimate items
+    EstimateItem.query.filter_by(estimate_id=estimate.id).delete()
+    
+    # Add new estimate items
+    for idx, item_data in enumerate(data.get('items', []), 1):
+        # Check if item exists in database
+        item_code = item_data.get('item_code')
+        item = Item.query.filter_by(code=item_code).first()
+        
+        # If item doesn't exist or rate/picture is different, update or create
+        if not item:
+            item = Item(
+                code=item_code,
+                picture=item_data.get('picture', ''),
+                rate=item_data.get('rate', 0)
+            )
+            db.session.add(item)
+        elif item.rate != item_data.get('rate') or (item_data.get('picture') and item.picture != item_data.get('picture')):
+            item.rate = item_data.get('rate', item.rate)
+            if item_data.get('picture'):
+                item.picture = item_data.get('picture')
+        
+        # Create estimate item
+        estimate_item = EstimateItem(
+            estimate_id=estimate.id,
+            serial=idx,
+            item_code=item_code,
+            size=item_data.get('size', ''),
+            area=item_data.get('area'),
+            quantity=item_data.get('quantity', 0),
+            unit=item_data.get('unit', 'Piece'),
+            rate=item_data.get('rate', 0),
+            amount=item_data.get('amount', 0),
+            picture=item_data.get('picture', '')
+        )
+        
+        db.session.add(estimate_item)
+    
+    db.session.commit()
+    
+    return jsonify(estimate.to_dict())
 
 @app.route('/api/items', methods=['GET'])
 @allowed_users_only

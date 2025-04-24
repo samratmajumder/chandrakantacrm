@@ -186,8 +186,8 @@ endblock %} {% block styles %}
           <thead class="table-light">
             <tr>
               <th width="5%">S.No</th>
-              <th width="25%">Item Code</th>
               <th width="12%">Size</th>
+              <th width="25%">Item Code</th>
               <th width="10%">Picture</th>
               <th width="15%">Area</th>
               <th width="8%">Qty</th>
@@ -372,10 +372,54 @@ endblock %} {% block styles %}
     let selectedCustomerId = null;
     let currentRowForImage = null;
     let rowCounter = 1;
+    let isEditMode = {{ 'true' if is_edit else 'false' }};
+    let estimateId = {{ estimate_id if estimate_id else 'null' }};
 
-    // Initialize with 5 empty rows
-    for (let i = 0; i < 5; i++) {
-      addNewRow();
+    // If in edit mode, load the estimate data
+    if (isEditMode && estimateId) {
+      fetch(`/api/estimates/${estimateId}`)
+        .then(response => response.json())
+        .then(estimate => {
+          // Set customer data
+          selectedCustomerId = estimate.customer_id;
+          customerMobileInput.value = estimate.customer_mobile;
+          customerName.textContent = estimate.customer_name;
+          customerMobileDisplay.textContent = estimate.customer_mobile;
+          
+          // Get customer address
+          fetch(`/api/customers/${estimate.customer_id}`)
+            .then(response => response.json())
+            .then(customer => {
+              customerAddress.textContent = customer.address || "N/A";
+              customerDetails.style.display = "block";
+            });
+          
+          // Set quotation number
+          quotationNoInput.value = estimate.quotation_no;
+          
+          // Clear default rows
+          estimateTableBody.innerHTML = '';
+          
+          // Add estimate items
+          estimate.items.forEach(item => {
+            addExistingRow(item);
+          });
+          
+          // Update total amount
+          totalAmountDisplay.textContent = `₹${estimate.total_amount.toFixed(2)}`;
+          
+          // Update save button text
+          saveEstimateBtn.innerHTML = '<i class="fas fa-save me-1"></i> Update Estimate';
+        })
+        .catch(error => {
+          console.error("Error loading estimate:", error);
+          alert("Failed to load estimate data");
+        });
+    } else {
+      // Initialize with 5 empty rows for new estimate
+      for (let i = 0; i < 5; i++) {
+        addNewRow();
+      }
     }
 
     // Check for customer_id in URL query params
@@ -599,12 +643,12 @@ endblock %} {% block styles %}
       row.className = "item-row";
       row.innerHTML = `
                 <td class="text-center">${rowCounter}</td>
+                <td>
+                    <input type="text" class="form-control" placeholder="Size">
+                </td>
                 <td class="item-code-cell">
                     <input type="text" class="form-control item-code-input" placeholder="Enter item code">
                     <div class="item-suggestions"></div>
-                </td>
-                <td>
-                    <input type="text" class="form-control" placeholder="Size">
                 </td>
                 <td class="text-center item-picture-cell">
                     <div class="picture-placeholder" onclick="openImageUploadModal(this)">
@@ -613,12 +657,12 @@ endblock %} {% block styles %}
                 </td>
                 <td>
                     <div class="input-group">
-                        <input type="number" class="form-control area-input" placeholder="Area" step="0.01">
+                        <input type="number" class="form-control area-input" placeholder="Area" step="0.01" onfocus="this.select()">
                         <span class="input-group-text">Sq. Ft.</span>
                     </div>
                 </td>
                 <td>
-                    <input type="number" class="form-control quantity-input" placeholder="Qty" value="1" min="1" step="0.01">
+                    <input type="number" class="form-control quantity-input" placeholder="Qty" value="1" min="1" step="0.01" onfocus="this.select()">
                 </td>
                 <td>
                     <select class="form-select unit-select">
@@ -627,10 +671,109 @@ endblock %} {% block styles %}
                     </select>
                 </td>
                 <td>
-                    <input type="number" class="form-control rate-input" placeholder="Rate" value="0" min="0" step="0.01">
+                    <input type="number" class="form-control rate-input" placeholder="Rate" value="0" min="0" step="0.01" onfocus="this.select()">
                 </td>
                 <td>
                     <input type="number" class="form-control amount-input" placeholder="Amount" value="0" readonly>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-outline-danger delete-row-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </td>
+            `;
+
+      estimateTableBody.appendChild(row);
+
+      // Add event listeners to the new row
+      const itemCodeInput = row.querySelector(".item-code-input");
+      const itemSuggestions = row.querySelector(".item-suggestions");
+      const quantityInput = row.querySelector(".quantity-input");
+      const rateInput = row.querySelector(".rate-input");
+      const amountInput = row.querySelector(".amount-input");
+      const deleteBtn = row.querySelector(".delete-row-btn");
+
+      // Item code autocomplete
+      itemCodeInput.addEventListener("input", function () {
+        const searchTerm = this.value.trim();
+        if (searchTerm.length >= 2) {
+          searchItems(searchTerm, itemSuggestions, row);
+        } else {
+          itemSuggestions.style.display = "none";
+        }
+      });
+
+      // Hide suggestions when clicking outside
+      document.addEventListener("click", function (e) {
+        if (
+          !itemCodeInput.contains(e.target) &&
+          !itemSuggestions.contains(e.target)
+        ) {
+          itemSuggestions.style.display = "none";
+        }
+      });
+
+      // Calculate amount when quantity or rate changes
+      quantityInput.addEventListener("input", function () {
+        calculateRowAmount(row);
+        updateTotalAmount();
+      });
+
+      rateInput.addEventListener("input", function () {
+        calculateRowAmount(row);
+        updateTotalAmount();
+      });
+
+      // Delete row
+      deleteBtn.addEventListener("click", function () {
+        if (estimateTableBody.children.length > 1) {
+          row.remove();
+          updateRowNumbers();
+          updateTotalAmount();
+        } else {
+          alert("Cannot delete the last row");
+        }
+      });
+
+      rowCounter++;
+    }
+
+    // Add existing row to estimate table (for editing)
+    function addExistingRow(item) {
+      const row = document.createElement("tr");
+      row.className = "item-row";
+      row.innerHTML = `
+                <td class="text-center">${rowCounter}</td>
+                <td>
+                    <input type="text" class="form-control" placeholder="Size" value="${item.size || ''}">
+                </td>
+                <td class="item-code-cell">
+                    <input type="text" class="form-control item-code-input" placeholder="Enter item code" value="${item.item_code}">
+                    <div class="item-suggestions"></div>
+                </td>
+                <td class="text-center item-picture-cell">
+                    ${item.picture ? `<img src="${item.picture}" class="item-picture" onclick="openImageUploadModal(this)">` : `<div class="picture-placeholder" onclick="openImageUploadModal(this)"><i class="fas fa-camera"></i></div>`}
+                </td>
+                <td>
+                    <div class="input-group">
+                        <input type="number" class="form-control area-input" placeholder="Area" step="0.01" value="${item.area || 0}" onfocus="this.select()">
+                        <span class="input-group-text">Sq. Ft.</span>
+                    </div>
+                </td>
+                <td>
+                    <input type="number" class="form-control quantity-input" placeholder="Qty" value="${item.quantity || 1}" min="1" step="0.01" onfocus="this.select()">
+                </td>
+                <td>
+                    <select class="form-select unit-select">
+                        <option value="Piece" ${item.unit === 'Piece' ? 'selected' : ''}>Piece</option>
+                        <option value="Box" ${item.unit === 'Box' ? 'selected' : ''}>Box</option>
+                    </select>
+                </td>
+                <td>
+                    <input type="number" class="form-control rate-input" placeholder="Rate" value="${item.rate || 0}" min="0" step="0.01" onfocus="this.select()">
+                </td>
+                <td>
+                    <input type="number" class="form-control amount-input" placeholder="Amount" value="${item.amount || 0}" readonly>
                 </td>
                 <td class="text-center">
                     <button type="button" class="btn btn-sm btn-outline-danger delete-row-btn">

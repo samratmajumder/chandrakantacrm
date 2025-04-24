@@ -24,6 +24,7 @@ class Config:
     
     # Store information
     STORE_NAME = "THE STUDIO"
+    STORE_TAGLINE = "Premium Designer Tile Store"
     STORE_ADDRESS = "Hewett Road, Lucknow, UP"
     STORE_PHONE = "7985217829 / 6390337095"
     STORE_EMAIL = "tctextra@gmail.com"

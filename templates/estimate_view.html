@@ -140,6 +140,12 @@ endblock %} {% block styles %}
   <button class="btn btn-primary" onclick="window.print()">
     <i class="fas fa-print me-2"></i>Print Estimate
   </button>
+  <a href="/estimates/edit/{{ estimate_id }}" class="btn btn-warning ms-2">
+    <i class="fas fa-edit me-2"></i>Edit Estimate
+  </a>
+  <button class="btn btn-success ms-2" id="exportPdfBtn">
+    <i class="fas fa-file-pdf me-2"></i>Export PDF
+  </button>
   <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary ms-2">
     <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
   </a>
@@ -149,6 +155,7 @@ endblock %} {% block styles %}
   <!-- Store Header -->
   <div class="store-header">
     <div class="store-name">{{ config.STORE_NAME }}</div>
+    <div class="store-tagline">{{ config.STORE_TAGLINE }}</div>
     <div class="store-address">{{ config.STORE_ADDRESS }}</div>
     <div class="store-contact">
       <span>{{ config.STORE_PHONE }}</span> |
@@ -189,8 +196,8 @@ endblock %} {% block styles %}
     <thead>
       <tr>
         <th width="5%">S.No</th>
-        <th width="20%">Item Code</th>
         <th width="15%">Size</th>
+        <th width="20%">Item Code</th>
         <th width="10%">Picture</th>
         <th width="10%">Area</th>
         <th width="10%">Qty</th>
@@ -219,6 +226,11 @@ endblock %} {% block styles %}
       <li>Delivery timeline will be confirmed upon order confirmation.</li>
       <li>Sunday Closed</li>
     </ol>
+  </div>
+  
+  <!-- Footer Text -->
+  <div class="text-center mt-5 mb-3" style="font-weight: bold; font-size: 16px; border-top: 1px solid #eee; padding-top: 15px;">
+    WE DO NOT SELL TILES WE SELL ART
   </div>
 </div>
 
@@ -252,6 +264,7 @@ endblock %} {% block styles %}
       const imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
       const modalImage = document.getElementById('modalImage');
       const estimateId = {{ estimate_id }};
+      const exportPdfBtn = document.getElementById('exportPdfBtn');
 
       // Load estimate data
       fetch(`/api/estimates/${estimateId}`)
@@ -279,7 +292,16 @@ endblock %} {% block styles %}
 
               // Fill estimate details
               document.getElementById('quotationNo').textContent = estimate.quotation_no;
-              document.getElementById('estimateDate').textContent = estimate.estimate_date;
+              
+              // Format date as DD-MM-YYYY
+              const dateParts = estimate.estimate_date.split('-');
+              if(dateParts.length === 3) {
+                  const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+                  document.getElementById('estimateDate').textContent = formattedDate;
+              } else {
+                  document.getElementById('estimateDate').textContent = estimate.estimate_date;
+              }
+              
               document.getElementById('estimateTime').textContent = estimate.estimate_time;
               document.getElementById('totalAmount').textContent = `₹${estimate.total_amount.toFixed(2)}`;
 
@@ -292,8 +314,8 @@ endblock %} {% block styles %}
 
                   row.innerHTML = `
                       <td>${item.serial}</td>
-                      <td>${item.item_code}</td>
                       <td>${item.size || ''}</td>
+                      <td>${item.item_code}</td>
                       <td class="text-center">
                           ${item.picture ? `<img src="${item.picture}" class="item-picture" style="cursor: pointer" onclick="openImageModal('${item.picture}')">` : ''}
                       </td>
@@ -317,6 +339,34 @@ endblock %} {% block styles %}
           modalImage.src = imageUrl;
           imageModal.show();
       };
+      
+      // PDF Export functionality
+      exportPdfBtn.addEventListener('click', function() {
+          const printSection = document.getElementById('printSection');
+          const estimateNo = document.getElementById('quotationNo').textContent;
+          const customerName = document.getElementById('customerName').textContent;
+          
+          // Generate PDF using html2pdf library
+          const opt = {
+              margin: 10,
+              filename: `Estimate_${estimateNo}_${customerName}.pdf`,
+              image: { type: 'jpeg', quality: 0.98 },
+              html2canvas: { scale: 2, useCORS: true },
+              jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+          };
+          
+          // Check if html2pdf is loaded, if not, load it
+          if (typeof html2pdf === 'undefined') {
+              const script = document.createElement('script');
+              script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+              script.onload = function() {
+                  html2pdf().set(opt).from(printSection).save();
+              };
+              document.head.appendChild(script);
+          } else {
+              html2pdf().set(opt).from(printSection).save();
+          }
+      });
   });
 </script>
 {% endblock %}

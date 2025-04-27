@@ -137,18 +137,21 @@ endblock %} {% block styles %}
 </div>
 
 <div class="action-buttons no-print">
-  <button class="btn btn-primary" onclick="window.print()">
-    <i class="fas fa-print me-2"></i>Print Estimate
-  </button>
-  <a href="/estimates/edit/{{ estimate_id }}" class="btn btn-warning ms-2">
-    <i class="fas fa-edit me-2"></i>Edit Estimate
-  </a>
-  <button class="btn btn-success ms-2" id="exportPdfBtn">
-    <i class="fas fa-file-pdf me-2"></i>Export PDF
-  </button>
-  <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary ms-2">
-    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
-  </a>
+    <button class="btn btn-primary" onclick="window.print()">
+        <i class="fas fa-print me-2"></i>Print Estimate
+    </button>
+    <a href="/estimates/edit/{{ estimate_id }}" class="btn btn-warning ms-2">
+        <i class="fas fa-edit me-2"></i>Edit Estimate
+    </a>
+    <button class="btn btn-success ms-2" id="exportPdfBtn">
+        <i class="fas fa-file-pdf me-2"></i>Export PDF
+    </button>
+    <button class="btn btn-danger ms-2" id="deleteEstimateBtn">
+        <i class="fas fa-trash me-2"></i>Delete Estimate
+    </button>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary ms-2">
+        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    </a>
 </div>
 
 <div class="print-section" id="printSection">
@@ -365,6 +368,30 @@ endblock %} {% block styles %}
               document.head.appendChild(script);
           } else {
               html2pdf().set(opt).from(printSection).save();
+          }
+      });
+
+      // Delete estimate functionality
+      const deleteEstimateBtn = document.getElementById('deleteEstimateBtn');
+      deleteEstimateBtn.addEventListener('click', function() {
+          if (confirm('Are you sure you want to delete this estimate? This action cannot be undone.')) {
+              fetch(`/api/estimates/${estimateId}`, {
+                  method: 'DELETE'
+              })
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error('Failed to delete estimate');
+                  }
+                  return response.json();
+              })
+              .then(data => {
+                  alert('Estimate deleted successfully');
+                  window.location.href = '/dashboard';
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+                  alert('Failed to delete estimate: ' + error.message);
+              });
           }
       });
   });

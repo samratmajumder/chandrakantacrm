@@ -181,6 +181,33 @@ def create_customer():
     
     return jsonify(customer.to_dict()), 201
 
+@app.route('/customers/edit/<int:customer_id>')
+@allowed_users_only
+def edit_customer(customer_id):
+    customer = Customer.query.get_or_404(customer_id)
+    return render_template('customer_edit.html', customer=customer)
+
+@app.route('/api/customers/<int:customer_id>', methods=['PUT'])
+@allowed_users_only
+def update_customer(customer_id):
+    customer = Customer.query.get_or_404(customer_id)
+    data = request.json
+    
+    if not data.get('name') or not data.get('mobile'):
+        return jsonify({'error': 'Name and mobile are required'}), 400
+    
+    # Update customer details
+    customer.name = data.get('name')
+    customer.mobile = data.get('mobile')
+    customer.address = data.get('address')
+    
+    try:
+        db.session.commit()
+        return jsonify(customer.to_dict()), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/search')
 @allowed_users_only
 def search():
@@ -397,6 +424,18 @@ def update_estimate(estimate_id):
     db.session.commit()
     
     return jsonify(estimate.to_dict())
+
+@app.route('/api/estimates/<int:estimate_id>', methods=['DELETE'])
+@allowed_users_only
+def delete_estimate(estimate_id):
+    estimate = Estimate.query.get_or_404(estimate_id)
+    try:
+        db.session.delete(estimate)
+        db.session.commit()
+        return jsonify({'message': 'Estimate deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/items', methods=['GET'])
 @allowed_users_only

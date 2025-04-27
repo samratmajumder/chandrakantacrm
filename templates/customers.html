@@ -242,6 +242,10 @@
                                                     data-customer-id="${customer.id}">
                                                 <i class="fas fa-eye me-1"></i>View Details
                                             </button>
+                                            <a href="/customers/edit/${customer.id}" 
+                                               class="btn btn-sm btn-warning">
+                                                <i class="fas fa-edit me-1"></i>Edit
+                                            </a>
                                             <a href="/estimates/new?customer_id=${customer.id}" 
                                                class="btn btn-sm btn-primary">
                                                 <i class="fas fa-file-invoice-dollar me-1"></i>New Estimate
